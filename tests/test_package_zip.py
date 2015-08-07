@@ -11,6 +11,8 @@ import uuid
 import json
 import random
 
+from nose.tools import assert_equals, assert_true, assert_false
+
 from lxml.html import fromstring
 
 from pylons import config
@@ -66,13 +68,13 @@ class TestPackageZip(BaseCase):
                         queue=queue,
                         cache_filepath='CCC')
 
-        assert send_task.called == True
+        assert_true(send_task.called)
 
         args, kwargs = send_task.call_args
-        assert args == ('packagezip.create_zip',)
+        assert_equals(args, ('packagezip.create_zip',))
 
-        assert kwargs['args'][1] == package_id
-        assert kwargs['args'][2] == queue
+        assert_equals(kwargs['args'][1], package_id)
+        assert_equals(kwargs['args'][2], queue)
 
     @mock.patch('ckan.lib.celery_app.celery.send_task')
     def test_resource_archive_event_doesnt_causes_create_zip_task(self, send_task):
@@ -85,50 +87,51 @@ class TestPackageZip(BaseCase):
                         queue=queue,
                         cache_filepath='CCC')
 
-        assert send_task.called == False
+        assert_false(send_task.called)
 
     def test_create_zip_task(self):
         package_id = self.pkg['id']
 
         filepath = self._create_zip_file(package_id)
 
-        assert os.path.exists(filepath), filepath
+        assert_true(os.path.exists(filepath))
 
         zipf = zipfile.ZipFile(filepath, 'r')
 
-        assert zipf.getinfo('resources/robots.txt').compress_type == zipfile.ZIP_DEFLATED
+        assert_equals(zipf.getinfo('data/robots.txt').compress_type, zipfile.ZIP_DEFLATED)
 
     def test_zip_index_file(self):
         package_id = self.pkg['id']
 
         filepath = self._create_zip_file(package_id)
 
-        assert os.path.exists(filepath), filepath
+        assert_true(os.path.exists(filepath))
 
         zipf = zipfile.ZipFile(filepath, 'r')
 
-        assert zipf.getinfo('index.html').compress_type == zipfile.ZIP_DEFLATED
+        assert_equals(zipf.getinfo('index.html').compress_type, zipfile.ZIP_DEFLATED)
 
         doc = fromstring(zipf.read('index.html'))
 
-        assert [self.pkg['title']] == doc.xpath('//h1/text()')
-        assert doc.xpath('//ul/li/a/@href') == ['resources/robots.txt']
-        assert doc.xpath('//ul/li/a/text()') == ['Robots.txt']
+        assert_equals([self.pkg['title']], doc.xpath('//h1/text()'))
+        assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt'])
+        assert_equals(doc.xpath('//ul/li/a/text()'), ['Robots.txt'])
 
     def test_zip_datapackage_file(self):
         package_id = self.pkg['id']
 
         filepath = self._create_zip_file(package_id)
 
-        assert os.path.exists(filepath), filepath
+        assert_true(os.path.exists(filepath))
 
         zipf = zipfile.ZipFile(filepath, 'r')
 
         assert zipf.getinfo('datapackage.json').compress_type == zipfile.ZIP_DEFLATED
         datapackage = json.loads(zipf.read('datapackage.json'))
 
-        assert datapackage['name'] == self.pkg['name']
-        assert datapackage['title'] == self.pkg['title']
-        assert len(datapackage['resources']) == 1
-        assert datapackage['resources'][0]['path'] == 'resources/robots.txt'
-        assert datapackage['resources'][0]['url'] == 'http://data.gov.uk/robots.txt'
+        assert_equals(datapackage['id'], self.pkg['id'])
+        assert_equals(datapackage['name'], self.pkg['name'])
+        assert_equals(datapackage['title'], self.pkg['title'])
+        assert_equals(len(datapackage['resources']), 1)
+        assert_equals(datapackage['resources'][0]['path'], 'data/robots.txt')
+        assert_equals(datapackage['resources'][0]['url'], 'http://data.gov.uk/robots.txt')

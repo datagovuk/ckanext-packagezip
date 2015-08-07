@@ -19,21 +19,11 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
     filename = "{0}.zip".format(package_id)
     filepath = os.path.join(directory, filename)
     with zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        datapackage = {
-            'name': pkg['name'],
-            'title': pkg['title'],
-            'resources': [],
-        }
+        datapackage = get_action('datapackage_show')(context, {'id': package_id})
 
-        for res in pkg['resources']:
-           archival = Archival.get_for_resource(res['id'])
-           if archival and archival.cache_filepath:
-               path, resource_id, filename = archival.cache_filepath.rsplit('/', 2)
-               zipf.write(archival.cache_filepath, 'resources/{0}'.format(filename))
-
-               datapackage['resources'].append({'path': 'resources/{0}'.format(filename),
-                                                'description': res['description'],
-                                                'url': res['url']})
+        for res in datapackage['resources']:
+           if res['cache_filepath']:
+               zipf.write(res['cache_filepath'], res['path'])
 
         template = jinja2.Template('''<html>
                                         <h1>{{datapackage.title}}</h1>

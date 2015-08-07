@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 
 class PackageZipPlugin(p.SingletonPlugin):
     p.implements(IPipe, inherit=True)
+    p.implements(p.IActions, inherit=True)
+    p.implements(p.IRoutes, inherit=True)
 
     def receive_data(self, operation, queue, **params):
         if operation == 'package-archived':
@@ -22,3 +24,19 @@ class PackageZipPlugin(p.SingletonPlugin):
                              args=[ckan_ini_filepath, package_id, queue],
                              task_id=task_id, queue=queue)
             log.debug('Package zip of package put into celery queue %s: %s', queue, package_id)
+
+    def get_actions(self):
+        from ckanext.packagezip import logic_action as logic
+        return {
+            'datapackage_show': logic.datapackage_show,
+            }
+
+    def after_map(self, map):
+        controller = 'ckanext.packagezip.controllers:PackageZipController'
+        map.connect(
+            '/dataset/{id}/datapackage.json',
+            controller=controller,
+            action='datapackage'
+        )
+        return map
+
