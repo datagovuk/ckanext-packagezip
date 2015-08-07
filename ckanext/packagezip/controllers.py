@@ -13,4 +13,4 @@ class PackageZipController(t.BaseController):
             t.abort(401)
 
         response.headers['Content-type'] = 'text/json'
-        return json.dumps(datapackage)
+        return json.dumps(datapackage, sort_keys=True, indent=4)
