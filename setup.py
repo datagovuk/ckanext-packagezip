@@ -23,6 +23,9 @@ setup(
         # -*- Extra requirements: -*-
     ],
     entry_points='''
+        [paste.paster_command]
+        packagezip = ckanext.packagezip.commands:PackageZip
+
         [ckan.plugins]
         # Add plugins here, e.g.
         packagezip=ckanext.packagezip.plugin:PackageZipPlugin

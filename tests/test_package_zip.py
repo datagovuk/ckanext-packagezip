@@ -2,7 +2,9 @@ from ckan import model
 from ckan.tests import BaseCase
 from ckan.logic import get_action
 from ckanext.archiver.interfaces import IPipe
-from ckanext.archiver.tasks import update
+from ckanext.archiver.tasks import update_resource
+from ckanext.archiver import model as archiver_model
+from ckanext.packagezip import model as packagezip_model
 
 import mock
 import os
@@ -28,20 +30,29 @@ class TestPackageZip(BaseCase):
 
         cls.config = config.__file__
 
-    def setup(self):
-        self.pkg = self._test_package('http://data.gov.uk/robots.txt')
+        archiver_model.init_tables(model.meta.engine)
+        packagezip_model.init_tables(model.meta.engine)
 
-    def _test_package(self, url, format=None):
+    def setup(self):
+        resources = [
+            {'url': 'http://data.gov.uk/robots.txt',
+             'description': 'DGU Robots.txt',
+             'format': 'TXT'},
+            {'url': 'https://www.gov.uk/robots.txt',
+             'description': 'Gov.UK Robots.txt',
+             'format': 'TXT'},
+        ]
+        self.pkg = self._test_package(resources)
+
+    def _test_package(self, resources):
         context = {'model': model, 'ignore_auth': True, 'session': model.Session, 'user': 'test'}
         title = " ".join(random.sample(words, 3))
         name = title.lower().replace(' ', '-') + '-' + str(uuid.uuid4())
-        pkg = {'title': title, 'name': name, 'resources': [
-            {'url': url, 'format': format or 'TXT', 'description': 'Robots.txt'}
-            ]}
+        pkg = {'title': title, 'name': name, 'resources': resources}
         pkg = get_action('package_create')(context, pkg)
 
         for res in pkg['resources']:
-            update(self.config, res['id']) # This causes test to depend on internet
+            update_resource(self.config, res['id']) # This causes test to depend on internet
 
         return pkg
 
@@ -51,11 +62,9 @@ class TestPackageZip(BaseCase):
         res = create_zip.apply_async(args=['CCC', package_id, 'queue1'])
         res.get()
 
-        dest_dir = config.get('ckanext.packagezip.destination_dir')
-        filename = "{0}.zip".format(package_id)
-        filepath = os.path.join(dest_dir, filename)
+        pz = packagezip_model.PackageZip.get_for_package(package_id)
 
-        return filepath
+        return pz.filepath
 
     @mock.patch('ckan.lib.celery_app.celery.send_task')
     def test_package_archive_event_causes_create_zip_task(self, send_task):
@@ -100,6 +109,22 @@ class TestPackageZip(BaseCase):
 
         assert_equals(zipf.getinfo('data/robots.txt').compress_type, zipfile.ZIP_DEFLATED)
 
+    def test_zip_filename(self):
+        package_id = self.pkg['id']
+        package_name = self.pkg['name']
+
+        filepath = self._create_zip_file(package_id)
+
+        assert_equals('{0}.zip'.format(package_name), os.path.basename(filepath)) 
+
+    def test_zip_directory(self):
+        package_id = self.pkg['id']
+
+        filepath = self._create_zip_file(package_id)
+
+        assert_equals(config.get('ckanext.packagezip.destination_dir'),
+                      os.path.dirname(filepath))
+
     def test_zip_index_file(self):
         package_id = self.pkg['id']
 
@@ -114,8 +139,8 @@ class TestPackageZip(BaseCase):
         doc = fromstring(zipf.read('index.html'))
 
         assert_equals([self.pkg['title']], doc.xpath('//h1/text()'))
-        assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt'])
-        assert_equals(doc.xpath('//ul/li/a/text()'), ['Robots.txt'])
+        assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt', 'data/robots.txt'])
+        assert_equals(doc.xpath('//ul/li/a/text()'), ['DGU Robots.txt', 'Gov.UK Robots.txt'])
 
     def test_zip_datapackage_file(self):
         package_id = self.pkg['id']
@@ -132,6 +157,11 @@ class TestPackageZip(BaseCase):
         assert_equals(datapackage['id'], self.pkg['id'])
         assert_equals(datapackage['name'], self.pkg['name'])
         assert_equals(datapackage['title'], self.pkg['title'])
-        assert_equals(len(datapackage['resources']), 1)
+
+        assert_equals(len(datapackage['resources']), 2)
+
         assert_equals(datapackage['resources'][0]['path'], 'data/robots.txt')
         assert_equals(datapackage['resources'][0]['url'], 'http://data.gov.uk/robots.txt')
+
+        assert_equals(datapackage['resources'][1]['path'], 'data/robots.txt')
+        assert_equals(datapackage['resources'][1]['url'], 'https://www.gov.uk/robots.txt')

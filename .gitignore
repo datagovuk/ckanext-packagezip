@@ -1,1 +1,2 @@
 *.pyc
+ckanext_packagezip.egg-info

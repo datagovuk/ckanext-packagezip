@@ -2,6 +2,7 @@ from ckan.lib.celery_app import celery
 from ckan import model
 from ckan.logic import get_action
 from ckanext.archiver.model import Archival
+from ckanext.packagezip.model import PackageZip
 from pylons import config
 
 import os
@@ -16,7 +17,7 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
     pkg = get_action('package_show')(context, {'id': package_id})
 
     directory = config.get('ckanext.packagezip.destination_dir')
-    filename = "{0}.zip".format(package_id)
+    filename = "{0}.zip".format(pkg['name'])
     filepath = os.path.join(directory, filename)
     with zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
         datapackage = get_action('datapackage_show')(context, {'id': package_id})
@@ -36,3 +37,5 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
 
         zipf.writestr('index.html', template.render(datapackage=datapackage))
         zipf.writestr('datapackage.json', json.dumps(datapackage, indent=4))
+
+    PackageZip.create(package_id, filepath)
