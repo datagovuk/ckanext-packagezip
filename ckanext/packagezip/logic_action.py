@@ -20,16 +20,16 @@ def datapackage_show(context, data_dict):
 
     used_names = []
     for res in pkg['resources']:
-       archival = Archival.get_for_resource(res['id'])
-       if archival and archival.cache_filepath:
-           _, resource_id, filename = archival.cache_filepath.rsplit('/', 2)
-           cache_filepath = archival.cache_filepath
-       else:
-           _, filename = res['url'].rsplit('/', 1)
-           cache_filepath = ''
-       datapackage['resources'].append({'url': res['url'],
-                                        'path': 'data/{0}'.format(filename),
-                                        'cache_filepath': cache_filepath,
-                                        'description': res['description']})
+        archival = Archival.get_for_resource(res['id'])
+        if archival and archival.cache_filepath:
+            _, resource_id, filename = archival.cache_filepath.rsplit('/', 2)
+            cache_filepath = archival.cache_filepath
+        else:
+            _, filename = res['url'].rsplit('/', 1)
+            cache_filepath = ''
+        datapackage['resources'].append({'url': res['url'],
+                                         'path': 'data/{0}'.format(filename),
+                                         'cache_filepath': cache_filepath,
+                                         'description': res['description']})
 
     return datapackage
