@@ -1,6 +1,7 @@
 import ckan.plugins as p
 from ckanext.archiver.model import Archival
 from ckan.logic.auth import get_package_object
+from ckanext.packagezip.util import FilenameDeduplicator
 
 @p.toolkit.side_effect_free
 def datapackage_show(context, data_dict):
@@ -18,7 +19,7 @@ def datapackage_show(context, data_dict):
         'resources': [],
     }
 
-    used_names = []
+    fd = FilenameDeduplicator()
     for res in pkg['resources']:
         archival = Archival.get_for_resource(res['id'])
         if archival and archival.cache_filepath:
@@ -27,6 +28,7 @@ def datapackage_show(context, data_dict):
         else:
             _, filename = res['url'].rsplit('/', 1)
             cache_filepath = ''
+        filename = fd.deduplicate(filename)
         datapackage['resources'].append({'url': res['url'],
                                          'path': 'data/{0}'.format(filename),
                                          'cache_filepath': cache_filepath,

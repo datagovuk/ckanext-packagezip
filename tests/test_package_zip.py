@@ -139,7 +139,7 @@ class TestPackageZip(BaseCase):
         doc = fromstring(zipf.read('index.html'))
 
         assert_equals([self.pkg['title']], doc.xpath('//h1/text()'))
-        assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt', 'data/robots.txt'])
+        assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt', 'data/robots1.txt'])
         assert_equals(doc.xpath('//ul/li/a/text()'), ['DGU Robots.txt', 'Gov.UK Robots.txt'])
 
     def test_zip_datapackage_file(self):
@@ -163,5 +163,5 @@ class TestPackageZip(BaseCase):
         assert_equals(datapackage['resources'][0]['path'], 'data/robots.txt')
         assert_equals(datapackage['resources'][0]['url'], 'http://data.gov.uk/robots.txt')
 
-        assert_equals(datapackage['resources'][1]['path'], 'data/robots.txt')
+        assert_equals(datapackage['resources'][1]['path'], 'data/robots1.txt')
         assert_equals(datapackage['resources'][1]['url'], 'https://www.gov.uk/robots.txt')
