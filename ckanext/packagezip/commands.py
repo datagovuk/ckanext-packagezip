@@ -3,6 +3,7 @@ from ckan.lib.cli import CkanCommand
 import logging
 import uuid
 import os
+import sys
 
 from pylons import config
 
