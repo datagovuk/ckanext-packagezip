@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import Column, MetaData
 from sqlalchemy import types
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.exc import NoResultFound
 
 import ckan.model as model
 
@@ -39,9 +40,12 @@ class PackageZip(Base):
     @classmethod
     def get_for_package(cls, package_id):
         '''Returns the package zip for the given package.'''
-        return model.Session.query(cls) \
-                    .filter(cls.package_id==package_id) \
-                    .one()
+        try:
+            return model.Session.query(cls) \
+                        .filter(cls.package_id==package_id) \
+                        .one()
+        except NoResultFound:
+            return None
 
     @classmethod
     def create(cls, package_id, filepath):

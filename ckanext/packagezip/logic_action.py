@@ -2,6 +2,7 @@ import ckan.plugins as p
 from ckanext.archiver.model import Archival
 from ckan.logic.auth import get_package_object
 from ckanext.packagezip.util import FilenameDeduplicator
+from ckanext.packagezip.model import PackageZip
 
 @p.toolkit.side_effect_free
 def datapackage_show(context, data_dict):
@@ -18,6 +19,12 @@ def datapackage_show(context, data_dict):
         'title': pkg['title'],
         'resources': [],
     }
+
+    try:
+        package_zip = PackageZip.get_for_package(pkg['id'])
+        datapackage['filepath'] = package_zip.filepath
+    except Exception, ex:
+        pass
 
     fd = FilenameDeduplicator()
     for res in pkg['resources']:

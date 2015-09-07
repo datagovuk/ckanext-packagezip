@@ -28,7 +28,7 @@ class TestPackageZip(BaseCase):
         if not os.path.isdir(dest_dir):
             os.mkdir(dest_dir)
 
-        cls.config = config.__file__
+        cls.config = config['__file__']
 
         archiver_model.init_tables(model.meta.engine)
         packagezip_model.init_tables(model.meta.engine)
