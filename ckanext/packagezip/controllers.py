@@ -30,7 +30,7 @@ class PackageZipController(t.BaseController):
         filename = os.path.basename(filepath)
 
         response.headers['Content-type'] = 'application/zip'
-        response.headers['Content-Disposition'] = 'attachment; filename=%s' % filename
+        response.headers['Content-Disposition'] = str('attachment; filename=%s' % filename)
 
         with open(filepath) as zipfile:
             response.write(zipfile.read())
