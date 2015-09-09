@@ -59,7 +59,7 @@ class TestPackageZip(BaseCase):
     def _create_zip_file(self, package_id):
         from ckanext.packagezip.tasks import create_zip
         # celery.send_task doesn't respect CELERY_ALWAYS_EAGER
-        res = create_zip.apply_async(args=['CCC', package_id, 'queue1'])
+        res = create_zip.apply_async(args=[self.config, package_id, 'queue1'])
         res.get()
 
         pz = packagezip_model.PackageZip.get_for_package(package_id)
@@ -75,7 +75,7 @@ class TestPackageZip(BaseCase):
         IPipe.send_data('package-archived',
                         package_id=package_id,
                         queue=queue,
-                        cache_filepath='CCC')
+                        cache_filepath=self.config)
 
         assert_true(send_task.called)
 
@@ -94,7 +94,7 @@ class TestPackageZip(BaseCase):
         IPipe.send_data('archived',
                         resource_id=resource_id,
                         queue=queue,
-                        cache_filepath='CCC')
+                        cache_filepath=self.config)
 
         assert_false(send_task.called)
 
