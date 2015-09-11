@@ -7,8 +7,6 @@ import sys
 
 from pylons import config
 
-from ckan.lib.celery_app import celery
-
 class PackageZip(CkanCommand):
     """
     Usage:
@@ -42,6 +40,8 @@ class PackageZip(CkanCommand):
             self.log.info('Package Zip tables are initialized')
         elif cmd == 'create-zip':
             import ckan.model as model
+            from ckan.lib.celery_app import celery
+
             package_name = self.args[1]
 
             pkg = model.Package.get(package_name)
