@@ -9,7 +9,7 @@ import os
 import zipfile
 import tempfile
 import json
-import jinja2
+from jinja2 import Environment, PackageLoader
 
 def load_config(ckan_ini_filepath):
     import paste.deploy
@@ -36,19 +36,8 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
            if res['cache_filepath'] and os.path.exists(res['cache_filepath']):
                zipf.write(res['cache_filepath'], res['path'])
 
-        template = jinja2.Template('''<html>
-                                        <head>
-                                          <meta charset="UTF-8">
-                                        </head>
-                                        <body>
-                                        <h1>{{datapackage.title}}</h1>
-                                        <ul>
-                                        {% for resource in datapackage.resources %}
-                                          <li><a href="{{resource.path}}">{{resource.description}}</a></li>
-                                        {% endfor %}
-                                        </ul>
-                                        </body>
-                                      </html>''')
+        env = Environment(loader=PackageLoader('ckanext.packagezip', 'templates'))
+        template = env.get_template('index.html')
 
         zipf.writestr('index.html',
                       template.render(datapackage=datapackage).encode('utf8'))
