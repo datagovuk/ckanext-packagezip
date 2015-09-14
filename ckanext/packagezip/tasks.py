@@ -35,6 +35,9 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
         for res in datapackage['resources']:
            if res['cache_filepath'] and os.path.exists(res['cache_filepath']):
                zipf.write(res['cache_filepath'], res['path'])
+               res['missing'] = False
+           else:
+               res['missing'] = True
 
         env = Environment(loader=PackageLoader('ckanext.packagezip', 'templates'))
         template = env.get_template('index.html')

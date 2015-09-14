@@ -6,7 +6,11 @@
     <h1>{{datapackage.title}}</h1>
     <ul>
 {% for resource in datapackage.resources %}
+  {% if not resource.missing %}
     <li><a href="{{resource.path}}">{{resource.description}}</a></li>
+  {% else %}
+    <li><span class="missing">{{resource.description}}</span></li>
+  {% endif %}
 {% endfor %}
     </ul>
   </body>

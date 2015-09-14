@@ -41,6 +41,9 @@ class TestPackageZip(BaseCase):
             {'url': 'https://www.gov.uk/robots.txt',
              'description': 'Gov.UK Robots.txt',
              'format': 'TXT'},
+            {'url': 'https://httpbin.org/status/404',
+             'description': 'Missing Resource',
+             'format': 'TXT'},
         ]
         self.pkg = self._test_package(resources)
 
@@ -139,8 +142,11 @@ class TestPackageZip(BaseCase):
         doc = fromstring(zipf.read('index.html'))
 
         assert_equals([self.pkg['title']], doc.xpath('//h1/text()'))
-        assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt', 'data/robots1.txt'])
-        assert_equals(doc.xpath('//ul/li/a/text()'), ['DGU Robots.txt', 'Gov.UK Robots.txt'])
+        assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt',
+                                                     'data/robots1.txt'])
+        assert_equals(doc.xpath('//ul/li/a/text()'), ['DGU Robots.txt',
+                                                      'Gov.UK Robots.txt'])
+        assert_equals(doc.xpath('//ul/li/span[@class=\'missing\']/text()'), ['Missing Resource'])
 
     def test_zip_datapackage_file(self):
         package_id = self.pkg['id']
@@ -158,10 +164,13 @@ class TestPackageZip(BaseCase):
         assert_equals(datapackage['name'], self.pkg['name'])
         assert_equals(datapackage['title'], self.pkg['title'])
 
-        assert_equals(len(datapackage['resources']), 2)
+        assert_equals(len(datapackage['resources']), 3)
 
         assert_equals(datapackage['resources'][0]['path'], 'data/robots.txt')
         assert_equals(datapackage['resources'][0]['url'], 'http://data.gov.uk/robots.txt')
 
         assert_equals(datapackage['resources'][1]['path'], 'data/robots1.txt')
         assert_equals(datapackage['resources'][1]['url'], 'https://www.gov.uk/robots.txt')
+
+        assert_equals(datapackage['resources'][2]['path'], 'data/404')
+        assert_equals(datapackage['resources'][2]['url'], 'https://httpbin.org/status/404')
