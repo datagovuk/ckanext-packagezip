@@ -19,9 +19,24 @@ def load_config(ckan_ini_filepath):
     ckan.config.environment.load_environment(conf.global_conf,
                                              conf.local_conf)
 
+def register_translator():
+    # Register a translator in this thread so that
+    # the _() functions in logic layer can work
+    from paste.registry import Registry
+    from pylons import translator
+    from ckan.lib.cli import MockTranslator
+    global registry
+    registry=Registry()
+    registry.prepare()
+    global translator_obj
+    translator_obj=MockTranslator()
+    registry.register(translator, translator_obj)
+
+
 @celery.task(name="packagezip.create_zip")
 def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
     load_config(ckan_ini_filepath)
+    register_translator()
 
     context = {'model': model, 'ignore_auth': True, 'session': model.Session}
     pkg = get_action('package_show')(context, {'id': package_id})
