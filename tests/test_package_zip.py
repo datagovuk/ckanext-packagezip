@@ -13,7 +13,7 @@ import uuid
 import json
 import random
 
-from nose.tools import assert_equals, assert_true, assert_false
+from nose.tools import assert_equals, assert_not_equals, assert_true, assert_false
 
 from lxml.html import fromstring
 
@@ -185,3 +185,16 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a velit lectu
 
         assert_equals(datapackage['resources'][2]['path'], 'data/404')
         assert_equals(datapackage['resources'][2]['url'], 'https://httpbin.org/status/404')
+
+    def test_create_zip_task_again(self):
+        package_id = self.pkg['id']
+
+        filepath1 = self._create_zip_file(package_id)
+        pz1 = packagezip_model.PackageZip.get_for_package(package_id)
+
+        filepath2 = self._create_zip_file(package_id)
+        pz2 = packagezip_model.PackageZip.get_for_package(package_id)
+
+        assert_equals(filepath1, filepath2)
+
+        assert_not_equals(pz1.updated, pz2.updated)

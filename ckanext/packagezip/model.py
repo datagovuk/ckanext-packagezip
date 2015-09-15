@@ -25,7 +25,7 @@ class PackageZip(Base):
     __tablename__ = 'package_zip'
 
     id = Column(types.UnicodeText, primary_key=True, default=make_uuid)
-    package_id = Column(types.UnicodeText, nullable=False, index=True)
+    package_id = Column(types.UnicodeText, nullable=False, index=True, unique=True)
 
     # Details of last successful zip
     filepath = Column(types.UnicodeText)

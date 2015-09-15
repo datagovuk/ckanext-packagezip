@@ -9,6 +9,7 @@ import os
 import zipfile
 import tempfile
 import json
+import datetime
 from jinja2 import Environment, PackageLoader
 
 def load_config(ckan_ini_filepath):
@@ -61,4 +62,9 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
                       template.render(datapackage=datapackage).encode('utf8'))
         zipf.writestr('datapackage.json', json.dumps(datapackage, indent=4))
 
-    PackageZip.create(package_id, filepath)
+    package_zip = PackageZip.get_for_package(package_id)
+    if not package_zip:
+        PackageZip.create(package_id, filepath)
+    else:
+        package_zip.filepath = filepath
+        package_zip.updated = datetime.datetime.now()
