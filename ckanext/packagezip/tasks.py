@@ -29,7 +29,7 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
     directory = config.get('ckanext.packagezip.destination_dir')
     filename = "{0}.zip".format(pkg['name'])
     filepath = os.path.join(directory, filename)
-    with zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zipf:
         datapackage = get_action('datapackage_show')(context, {'id': package_id})
 
         for res in datapackage['resources']:
