@@ -51,7 +51,13 @@ class TestPackageZip(BaseCase):
         context = {'model': model, 'ignore_auth': True, 'session': model.Session, 'user': 'test'}
         title = " ".join(random.sample(words, 3))
         name = title.lower().replace(' ', '-') + '-' + str(uuid.uuid4())
-        pkg = {'title': title, 'name': name, 'resources': resources}
+        notes = """
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a velit lectus. Maecenas magna turpis, consequat et nibh a, porta tincidunt arcu. Pellentesque et venenatis ligula. Nam luctus luctus odio rutrum pulvinar. Cras vestibulum dolor eget elit cursus facilisis. Fusce eu nulla a justo euismod feugiat dictum a nisi. Donec porta, est nec euismod elementum, ligula odio fermentum orci, nec aliquam leo neque sed felis. Ut sed neque et neque gravida efficitur. Praesent efficitur tortor nunc, sed placerat ligula elementum nec. Nunc a augue et leo feugiat ornare in in urna. Nam ut sapien rutrum erat tincidunt suscipit. Pellentesque pulvinar diam eget nisl hendrerit, interdum posuere odio lobortis."""
+        pkg = {'title': title,
+               'name': name,
+               'resources': resources,
+               'notes': notes,
+               'license_id': 'uk-ogl'}
         pkg = get_action('package_create')(context, pkg)
 
         for res in pkg['resources']:
@@ -142,6 +148,9 @@ class TestPackageZip(BaseCase):
         doc = fromstring(zipf.read('index.html'))
 
         assert_equals([self.pkg['title']], doc.xpath('//h1/text()'))
+        assert_equals([self.pkg['notes']], doc.xpath('//p[@id=\'description\']/text()'))
+        assert_equals(['License', 'OGL-UK-3.0'],
+                      doc.xpath('//tr[@id=\'license\']/td/text()'))
         assert_equals(doc.xpath('//ul/li/a/@href'), ['data/robots.txt',
                                                      'data/robots1.txt'])
         assert_equals(doc.xpath('//ul/li/a/text()'), ['DGU Robots.txt',
@@ -163,6 +172,8 @@ class TestPackageZip(BaseCase):
         assert_equals(datapackage['id'], self.pkg['id'])
         assert_equals(datapackage['name'], self.pkg['name'])
         assert_equals(datapackage['title'], self.pkg['title'])
+        assert_equals(datapackage['description'], self.pkg['notes'])
+        assert_equals(datapackage['license'], 'OGL-UK-3.0')
 
         assert_equals(len(datapackage['resources']), 3)
 

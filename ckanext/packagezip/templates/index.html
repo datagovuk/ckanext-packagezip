@@ -1,17 +1,54 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <style>
+      {% include 'entireframework.min.css' %}
+    </style>
+    <style>
+      .dgugreen {
+        background-color: #f5fff2;
+        border-color: #690;
+      }
+      a {
+        color: #690;
+      }
+      #main {
+        background-color: #efefef;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      .missing {
+        color: #b94a48;
+        background-color: #f2dede;
+      }
+    </style>
   </head>
   <body>
-    <h1>{{datapackage.title}}</h1>
-    <ul>
-{% for resource in datapackage.resources %}
-  {% if not resource.missing %}
-    <li><a href="{{resource.path}}">{{resource.description}}</a></li>
-  {% else %}
-    <li><span class="missing">{{resource.description}}</span></li>
-  {% endif %}
-{% endfor %}
-    </ul>
+    <div class="row">
+      <div class="col c2">&nbsp;</div>
+      <div class="col c8">
+        <h1>{{datapackage.title}}</h1>
+        <p id="description">{{datapackage.description}}</p>
+
+        <table class="table">
+          <tr id="license"><td>License</td><td>{{datapackage.license}}</td></tr>
+        </table>
+
+        <h2>Resources</h2>
+        <ul>
+    {% for resource in datapackage.resources %}
+      {% if not resource.missing %}
+        <li><a href="{{resource.path}}">{{resource.description}}</a></li>
+      {% else %}
+        <li><span class="missing">{{resource.description}}</span></li>
+      {% endif %}
+    {% endfor %}
+        </ul>
+        <div class="msg dgugreen">
+        <strong>Alert headline!</strong>
+          Message text
+        </div>
+      </div>
+      <div class="col c2">&nbsp;</div>
   </body>
 </html>

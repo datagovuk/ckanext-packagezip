@@ -4,6 +4,10 @@ from ckan.logic.auth import get_package_object
 from ckanext.packagezip.util import FilenameDeduplicator
 from ckanext.packagezip.model import PackageZip
 
+LICENSE_LOOKUP = {
+    'uk-ogl': 'OGL-UK-3.0',
+}
+
 @p.toolkit.side_effect_free
 def datapackage_show(context, data_dict):
     """
@@ -17,6 +21,8 @@ def datapackage_show(context, data_dict):
         'id': pkg['id'],
         'name': pkg['name'],
         'title': pkg['title'],
+        'description': pkg['notes'],
+        'license': LICENSE_LOOKUP.get(pkg['license_id'], ''),
         'resources': [],
     }
 
