@@ -31,8 +31,7 @@ class PackageZipController(t.BaseController):
 
         filename = os.path.basename(filepath)
 
-        headers = [('Content-type', 'application/zip'),
-                   ('Content-Disposition', str('attachment; filename=%s' % filename))]
+        headers = [('Content-Disposition', str('attachment; filename=%s' % filename))]
 
-        file_app = FileApp(filepath, headers=headers)
+        file_app = FileApp(filepath, headers=headers, content_type='application/octet-stream')
         return file_app(request.environ, self.start_response)
