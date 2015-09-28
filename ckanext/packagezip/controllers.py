@@ -1,6 +1,8 @@
 import ckan.plugins.toolkit as t
 from ckan import model
 from ckan.lib.base import response
+from paste.fileapp import FileApp
+from pylons import request
 
 import json
 import os
@@ -29,8 +31,8 @@ class PackageZipController(t.BaseController):
 
         filename = os.path.basename(filepath)
 
-        response.headers['Content-type'] = 'application/zip'
-        response.headers['Content-Disposition'] = str('attachment; filename=%s' % filename)
+        headers = [('Content-type', 'application/zip'),
+                   ('Content-Disposition', str('attachment; filename=%s' % filename))]
 
-        with open(filepath) as zipfile:
-            response.write(zipfile.read())
+        file_app = FileApp(filepath, headers=headers)
+        return file_app(request.environ, self.start_response)
