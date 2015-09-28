@@ -28,7 +28,9 @@
       <div class="col c2">&nbsp;</div>
       <div class="col c8">
         <h1>{{datapackage.title}}</h1>
+        {% if datapackage.description %}
         <p id="description">{{datapackage.description}}</p>
+        {% endif %}
 
         <table class="table">
           <tr id="license"><td>License</td><td>{{datapackage.license}}</td></tr>
@@ -37,16 +39,21 @@
         <h2>Resources</h2>
         <ul>
     {% for resource in datapackage.resources %}
-      {% if not resource.missing %}
-        <li><a href="{{resource.path}}">{{resource.description}}</a></li>
+      {% if resource.included_in_zip %}
+        <li>
+          <a href="{{resource.path}}" class="local">{{resource.description}}</a>
+          - (<a href="{{resource.url}}" class="source">source</a>)
+        </li>
       {% else %}
-        <li><span class="missing">{{resource.description}}</span></li>
+        <li>
+          <span class="missing">{{resource.description}}</span>
+          - (<a href="{{resource.url}}" class="source">source</a>)
+        </li>
       {% endif %}
     {% endfor %}
         </ul>
-        <div class="msg dgugreen">
-        <strong>Alert headline!</strong>
-          Message text
+        <div id="created" class="msg dgugreen">
+          Data Package Zip created {{date|datetimeformat}}
         </div>
       </div>
       <div class="col c2">&nbsp;</div>

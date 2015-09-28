@@ -42,7 +42,7 @@ class PackageZipPlugin(p.SingletonPlugin):
         )
         map.connect(
             'zipfile',
-            '/dataset/{name}/zipfile',
+            '/dataset/{name}/datepackage.zip',
             controller=controller,
             action='zipfile'
         )

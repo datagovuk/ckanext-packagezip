@@ -22,6 +22,7 @@ setup(
     install_requires=[
         # -*- Extra requirements: -*-
     ],
+    tests_require = ['freezegun==0.3.5'],
     entry_points='''
         [paste.paster_command]
         packagezip = ckanext.packagezip.commands:PackageZip

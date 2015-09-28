@@ -33,6 +33,9 @@ def register_translator():
     translator_obj=MockTranslator()
     registry.register(translator, translator_obj)
 
+def datetimeformat(value, format='%d/%m/%Y - %H:%M'):
+    return value.strftime(format)
+
 
 @celery.task(name="packagezip.create_zip")
 def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
@@ -51,15 +54,17 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
         for res in datapackage['resources']:
            if res['cache_filepath'] and os.path.exists(res['cache_filepath']):
                zipf.write(res['cache_filepath'], res['path'])
-               res['missing'] = False
+               res['included_in_zip'] = True
            else:
-               res['missing'] = True
+               res['included_in_zip'] = False
 
         env = Environment(loader=PackageLoader('ckanext.packagezip', 'templates'))
+        env.filters['datetimeformat'] = datetimeformat
         template = env.get_template('index.html')
 
         zipf.writestr('index.html',
-                      template.render(datapackage=datapackage).encode('utf8'))
+                      template.render(datapackage=datapackage,
+                                      date=datetime.datetime.now()).encode('utf8'))
         zipf.writestr('datapackage.json', json.dumps(datapackage, indent=4))
 
     package_zip = PackageZip.get_for_package(package_id)
