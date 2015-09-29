@@ -21,10 +21,12 @@ def datapackage_show(context, data_dict):
         'id': pkg['id'],
         'name': pkg['name'],
         'title': pkg['title'],
-        'description': pkg['notes'],
         'license': LICENSE_LOOKUP.get(pkg['license_id'], ''),
         'resources': [],
     }
+
+    if pkg['notes']:
+        datapackage['description'] = pkg['notes']
 
     try:
         package_zip = PackageZip.get_for_package(pkg['id'])
