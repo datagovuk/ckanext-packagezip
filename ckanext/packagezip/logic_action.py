@@ -45,7 +45,7 @@ def datapackage_show(context, data_dict):
             cache_filepath = ''
         filename = fd.deduplicate(filename)
         datapackage['resources'].append({'url': res['url'],
-                                         'path': 'data/{0}'.format(filename),
+                                         'path': u'data/{0}'.format(filename),
                                          'cache_filepath': cache_filepath,
                                          'description': res['description']})
 
