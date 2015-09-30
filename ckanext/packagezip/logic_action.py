@@ -41,7 +41,10 @@ def datapackage_show(context, data_dict):
             _, resource_id, filename = archival.cache_filepath.rsplit('/', 2)
             cache_filepath = archival.cache_filepath
         else:
-            _, filename = res['url'].rsplit('/', 1)
+            try:
+                _, filename = res['url'].rsplit('/', 1)
+            except ValueError:
+                filename = res['id']
             cache_filepath = ''
         filename = fd.deduplicate(filename)
         datapackage['resources'].append({'url': res['url'],
