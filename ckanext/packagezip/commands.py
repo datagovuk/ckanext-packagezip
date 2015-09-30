@@ -7,14 +7,29 @@ import sys
 
 from pylons import config
 
+
+def name_stripped_of_url(url_or_name):
+    '''Returns a name. If it is in a URL it strips that bit off.
+
+    e.g. https://data.gov.uk/publisher/barnet-primary-care-trust
+         -> barnet-primary-care-trust
+
+         barnet-primary-care-trust
+         -> barnet-primary-care-trust
+    '''
+    if url_or_name.startswith('http'):
+        return url_or_name.split('/')[-1]
+    return url_or_name
+
+
 class PackageZip(CkanCommand):
     """
     Usage:
 
         paster packagezip init
            - Creates the database table archiver needs to run
-        paster packagezip create-zip <package name>
-           - Creates the zipfile for a given package
+        paster packagezip create-zip <package name/url> [<package name/url> ...]
+           - Creates the package zip for given package(s)
 
     """
     summary = __doc__.split('\n')[0]
@@ -42,16 +57,22 @@ class PackageZip(CkanCommand):
             import ckan.model as model
             from ckan.lib.celery_app import celery
 
-            package_name = self.args[1]
-
-            pkg = model.Package.get(package_name)
+            datasets = []
+            for name in self.args[1:]:
+                name_ = name_stripped_of_url(name)
+                dataset = model.Package.get(name_)
+                assert dataset, 'Could not find dataset: %s' % name
+                datasets.append(dataset)
+            assert datasets, 'No datasets to zip!'
 
             ckan_ini_filepath = os.path.abspath(config['__file__'])
             task_id = str(uuid.uuid4())
             queue = 'priority'
 
-            celery.send_task('packagezip.create_zip',
-                             args=[ckan_ini_filepath, pkg.id, queue],
-                             task_id=task_id, queue=queue)
+            for dataset in datasets:
+                celery.send_task('packagezip.create_zip',
+                                args=[ckan_ini_filepath, dataset.id, queue],
+                                task_id=task_id, queue=queue)
+                print 'Queued %s' % dataset.name
         else:
             self.log.error('Command %s not recognized' % (cmd,))

@@ -41,15 +41,25 @@ def datetimeformat(value, format='%d/%m/%Y - %H:%M'):
 def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
     load_config(ckan_ini_filepath)
     register_translator()
+    log = create_zip.get_logger()
 
     context = {'model': model, 'ignore_auth': True, 'session': model.Session}
     pkg = get_action('package_show')(context, {'id': package_id})
 
     directory = config.get('ckanext.packagezip.destination_dir')
+    if not os.path.exists(directory):
+        log.info('Creating packagezip directory: %s' % directory)
+        os.mkdir(directory)
+
     filename = "{0}.zip".format(pkg['name'])
     filepath = os.path.join(directory, filename)
     with zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zipf:
-        datapackage = get_action('datapackage_show')(context, {'id': package_id})
+        try:
+            datapackage = get_action('datapackage_show')(context, {'id': package_id})
+        except KeyError, e:
+            log.error('Cannot find action - check this plugin is enabled: %s',
+                      e)
+            raise
 
         for res in datapackage['resources']:
            if res['cache_filepath'] and os.path.exists(res['cache_filepath']):
@@ -70,6 +80,8 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
     package_zip = PackageZip.get_for_package(package_id)
     if not package_zip:
         PackageZip.create(package_id, filepath)
+        log.info('Package zip created: %s', filepath)
     else:
         package_zip.filepath = filepath
         package_zip.updated = datetime.datetime.now()
+        log.info('Package zip updated: %s', filepath)
