@@ -12,9 +12,9 @@ class FilenameDeduplicator(object):
             parts = filename.rsplit('.', 1)
             for i in count(1):
                 if len(parts) == 2:
-                    filename = "{0}{1}.{2}".format(parts[0], i, parts[1])
+                    filename = u"{0}{1}.{2}".format(parts[0], i, parts[1])
                 else:
-                    filename = "{0}{1}".format(parts[0], i)
+                    filename = u"{0}{1}".format(parts[0], i)
 
                 if filename not in self.seen:
                     break

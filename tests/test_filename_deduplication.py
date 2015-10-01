@@ -27,3 +27,8 @@ class TestFilenameDeduplication(object):
         assert_equals(fd.deduplicate('index.html'), 'index.html')
         fd.reset()
         assert_equals(fd.deduplicate('index.html'), 'index.html')
+
+    def test_unicode_filename(self):
+        fd  = FilenameDeduplicator()
+        assert_equals(fd.deduplicate(u'\xa3'), u'\xa3')
+        assert_equals(fd.deduplicate(u'\xa3'), u'\xa31')
