@@ -1,4 +1,5 @@
 import ckan.plugins as p
+import ckan.logic as logic
 from ckanext.archiver.model import Archival
 from ckan.logic.auth import get_package_object
 from ckanext.packagezip.util import FilenameDeduplicator
@@ -15,7 +16,10 @@ def datapackage_show(context, data_dict):
     model = context['model']
     p.toolkit.check_access('package_show', context, data_dict)
 
-    pkg = get_package_object(context, data_dict).as_dict()
+    try:
+        pkg = get_package_object(context, data_dict).as_dict()
+    except logic.NotFound:
+        p.toolkit.abort(404)
 
     datapackage = {
         'id': pkg['id'],
