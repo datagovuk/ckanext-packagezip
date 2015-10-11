@@ -14,9 +14,9 @@ def datapackage_show(context, data_dict):
     """
     """
     model = context['model']
-    p.toolkit.check_access('package_show', context, data_dict)
 
     try:
+        p.toolkit.check_access('package_show', context, data_dict)
         pkg = get_package_object(context, data_dict).as_dict()
     except logic.NotFound:
         p.toolkit.abort(404)
