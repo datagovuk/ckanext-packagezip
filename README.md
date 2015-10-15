@@ -23,6 +23,11 @@ Now edit your CKAN .ini and enable the plugin:
     vim $CKAN_INI
         ckan.plugins += packagezip
 
+The next step is to create te database table required by this extension:
+
+    paster --plugin ckanext-packagezip packagezip init --config=$CKAN_INI 
+
+
 # Configuration
 
 In the CKAN .ini you need to set the directory where the zips will be saved:
