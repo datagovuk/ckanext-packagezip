@@ -9,6 +9,19 @@ LICENSE_LOOKUP = {
     'uk-ogl': 'OGL-UK-3.0',
 }
 
+
+FORMATS = ['csv', 'html', 'xls', 'xml', 'pdf', 'json', 'rdf', 'zip', 'ods',
+           'txt', 'aspx', 'doc', 'xsd', 'asp', 'ppt', 'kml', 'exe', 'xlsx']
+
+# WMS? SPARQL? SHTML? CSV/Zip?
+
+FORMATS_LOOKUP = {
+    'application/pdf; charset=binary': 'pdf',
+    'application/vnd.ms-excel; charset=binary': 'xls',
+    'application/zip; charset=binary': 'zip',
+    'txt/plain': 'txt',
+}
+
 @p.toolkit.side_effect_free
 def datapackage_show(context, data_dict):
     """
@@ -51,9 +64,16 @@ def datapackage_show(context, data_dict):
                 filename = res['id']
             cache_filepath = ''
         filename = fd.deduplicate(filename)
-        datapackage['resources'].append({'url': res['url'],
-                                         'path': u'data/{0}'.format(filename),
-                                         'cache_filepath': cache_filepath,
-                                         'description': res['description']})
+        resource_json = {'url': res['url'],
+                            'path': u'data/{0}'.format(filename),
+                            'cache_filepath': cache_filepath,
+                            'description': res['description']}
+
+        if res['format'].lower() in FORMATS:
+            resource_json['format'] = res['format'].lower()
+        elif FORMATS_LOOKUP.get(res['format'].lower()):
+            resource_json['format'] = FORMATS_LOOKUP.get(res['format'].lower())
+
+        datapackage['resources'].append(resource_json)
 
     return datapackage

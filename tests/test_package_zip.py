@@ -44,9 +44,12 @@ class TestPackageZip(BaseCase):
             {'url': 'https://www.gov.uk/robots.txt',
              'description': 'Gov.UK Robots.txt',
              'format': 'TXT'},
+            {'url': 'http://example.com/index.html',
+             'description': 'Example.com',
+             'format': 'HTML'},
             {'url': 'https://httpbin.org/status/404',
              'description': 'Missing Resource',
-             'format': 'TXT'},
+             'format': 'txt/plain'},
         ]
         self.pkg = self._test_package(resources)
 
@@ -156,12 +159,15 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a velit lectu
         assert_equals(['License', 'OGL-UK-3.0'],
                       doc.xpath('//tr[@id=\'license\']/td/text()'))
         assert_equals(doc.xpath('//ul/li/a[@class=\'local\']/@href'), ['data/robots.txt',
-                                                                       'data/robots1.txt'])
+                                                                       'data/robots1.txt',
+                                                                       'data/index.html'])
         assert_equals(doc.xpath('//ul/li/a[@class=\'local\']/text()'), ['DGU Robots.txt',
-                                                                        'Gov.UK Robots.txt'])
+                                                                        'Gov.UK Robots.txt',
+                                                                        'Example.com'])
         assert_equals(doc.xpath('//ul/li/span[@class=\'missing\']/text()'), ['Missing Resource'])
         src_urls = ['http://data.gov.uk/robots.txt',
                     'https://www.gov.uk/robots.txt',
+                    'http://example.com/index.html',
                     'https://httpbin.org/status/404']
         assert_equals(doc.xpath('//ul/li/a[@class=\'source\']/@href'), src_urls)
         assert_equals(doc.xpath('//div[@id=\'created\']/text()')[0].strip(),
@@ -185,19 +191,27 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a velit lectu
         assert_equals(datapackage['description'], self.pkg['notes'])
         assert_equals(datapackage['license'], 'OGL-UK-3.0')
 
-        assert_equals(len(datapackage['resources']), 3)
+        assert_equals(len(datapackage['resources']), 4)
 
         assert_equals(datapackage['resources'][0]['path'], 'data/robots.txt')
         assert_equals(datapackage['resources'][0]['url'], 'http://data.gov.uk/robots.txt')
+        assert_equals(datapackage['resources'][0]['format'], 'txt')
         assert_equals(datapackage['resources'][0]['included_in_zip'], True)
 
         assert_equals(datapackage['resources'][1]['path'], 'data/robots1.txt')
         assert_equals(datapackage['resources'][1]['url'], 'https://www.gov.uk/robots.txt')
+        assert_equals(datapackage['resources'][1]['format'], 'txt')
         assert_equals(datapackage['resources'][1]['included_in_zip'], True)
 
-        assert_equals(datapackage['resources'][2]['path'], 'data/404')
-        assert_equals(datapackage['resources'][2]['url'], 'https://httpbin.org/status/404')
-        assert_equals(datapackage['resources'][2]['included_in_zip'], False)
+        assert_equals(datapackage['resources'][2]['path'], 'data/index.html')
+        assert_equals(datapackage['resources'][2]['url'], 'http://example.com/index.html')
+        assert_equals(datapackage['resources'][2]['format'], 'html')
+        assert_equals(datapackage['resources'][2]['included_in_zip'], True)
+
+        assert_equals(datapackage['resources'][3]['path'], 'data/404')
+        assert_equals(datapackage['resources'][3]['url'], 'https://httpbin.org/status/404')
+        assert_equals(datapackage['resources'][3]['format'], 'txt')
+        assert_equals(datapackage['resources'][3]['included_in_zip'], False)
 
     def test_create_zip_task_again(self):
         package_id = self.pkg['id']
