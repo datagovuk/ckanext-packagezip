@@ -8,5 +8,10 @@ def has_packagezip(pkg):
 def packagezip_url(pkg):
     return toolkit.url_for('zipfile', name=pkg.name)
 
+def packagezip_size(pkg):
+    pz = PackageZip.get_for_package(pkg.id)
+    if pz:
+        return pz.size
+
 def datapackage_url(pkg):
     return toolkit.url_for('datapackage', name=pkg.name)
