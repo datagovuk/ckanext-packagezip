@@ -211,3 +211,28 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a velit lectu
         assert_equals(filepath1, filepath2)
 
         assert_not_equals(pz1.updated, pz2.updated)
+
+    def test_zip_file_size(self):
+        package_id = self.pkg['id']
+
+        filepath = self._create_zip_file(package_id)
+
+        pz = packagezip_model.PackageZip.get_for_package(package_id)
+
+        assert_equals(os.stat(filepath).st_size, pz.size)
+
+    def test_zip_file_size_updated(self):
+        package_id = self.pkg['id']
+
+        filepath = self._create_zip_file(package_id)
+
+        pz = packagezip_model.PackageZip.get_for_package(package_id)
+        pz.size = 0
+        model.Session.commit()
+
+        pz = packagezip_model.PackageZip.get_for_package(package_id)
+        assert_equals(0, pz.size)
+
+        filepath = self._create_zip_file(package_id)
+        pz = packagezip_model.PackageZip.get_for_package(package_id)
+        assert_true(pz.size > 0)

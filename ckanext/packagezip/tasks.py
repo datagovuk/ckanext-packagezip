@@ -77,11 +77,15 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
                                       date=datetime.datetime.now()).encode('utf8'))
         zipf.writestr('datapackage.json', json.dumps(datapackage, indent=4))
 
+    statinfo = os.stat(filepath)
+    filesize = statinfo.st_size
+
     package_zip = PackageZip.get_for_package(package_id)
     if not package_zip:
-        PackageZip.create(package_id, filepath)
+        PackageZip.create(package_id, filepath, filesize)
         log.info('Package zip created: %s', filepath)
     else:
         package_zip.filepath = filepath
         package_zip.updated = datetime.datetime.now()
+        package_zip.size = filesize
         log.info('Package zip updated: %s', filepath)
