@@ -48,10 +48,11 @@ class PackageZip(Base):
             return None
 
     @classmethod
-    def create(cls, package_id, filepath):
+    def create(cls, package_id, filepath, size):
         pz = cls()
         pz.package_id = package_id
         pz.filepath = filepath
+        pz.size = size
 
         model.Session.add(pz)
         model.Session.commit()

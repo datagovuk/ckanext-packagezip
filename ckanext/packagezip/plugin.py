@@ -53,6 +53,7 @@ class PackageZipPlugin(p.SingletonPlugin):
         helper_dict = {
             'has_packagezip': helpers.has_packagezip,
             'packagezip_url': helpers.packagezip_url,
+            'packagezip_size': helpers.packagezip_size,
             'datapackage_url': helpers.datapackage_url,
         }
         return helper_dict
