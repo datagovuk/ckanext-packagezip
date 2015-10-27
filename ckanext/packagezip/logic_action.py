@@ -2,24 +2,11 @@ import ckan.plugins as p
 import ckan.logic as logic
 from ckanext.archiver.model import Archival
 from ckan.logic.auth import get_package_object
-from ckanext.packagezip.util import FilenameDeduplicator
+from ckanext.packagezip.util import FilenameDeduplicator, datapackage_format
 from ckanext.packagezip.model import PackageZip
 
 LICENSE_LOOKUP = {
     'uk-ogl': 'OGL-UK-3.0',
-}
-
-
-FORMATS = ['csv', 'html', 'xls', 'xml', 'pdf', 'json', 'rdf', 'zip', 'ods',
-           'txt', 'aspx', 'doc', 'xsd', 'asp', 'ppt', 'kml', 'exe', 'xlsx']
-
-# WMS? SPARQL? SHTML? CSV/Zip?
-
-FORMATS_LOOKUP = {
-    'application/pdf; charset=binary': 'pdf',
-    'application/vnd.ms-excel; charset=binary': 'xls',
-    'application/zip; charset=binary': 'zip',
-    'txt/plain': 'txt',
 }
 
 @p.toolkit.side_effect_free
@@ -65,14 +52,13 @@ def datapackage_show(context, data_dict):
             cache_filepath = ''
         filename = fd.deduplicate(filename)
         resource_json = {'url': res['url'],
-                            'path': u'data/{0}'.format(filename),
-                            'cache_filepath': cache_filepath,
-                            'description': res['description']}
+                         'path': u'data/{0}'.format(filename),
+                         'cache_filepath': cache_filepath,
+                         'description': res['description']}
 
-        if res['format'].lower() in FORMATS:
-            resource_json['format'] = res['format'].lower()
-        elif FORMATS_LOOKUP.get(res['format'].lower()):
-            resource_json['format'] = FORMATS_LOOKUP.get(res['format'].lower())
+        format = datapackage_format(res['format'])
+        if format:
+            resource_json['format'] = format
 
         datapackage['resources'].append(resource_json)
 
