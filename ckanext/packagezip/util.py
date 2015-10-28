@@ -22,12 +22,25 @@ class FilenameDeduplicator(object):
         self.seen.append(filename)
         return filename
 
-ACCEPTABLE_EXTENSIONS = ['csv', 'html', 'xls', 'xml', 'pdf',
-                         'json', 'rdf', 'zip', 'ods', 'txt',
-                         'aspx', 'doc', 'xsd', 'asp', 'ppt',
-                         'kml', 'exe', 'xlsx']
-
-MIME_TO_FORMAT_MAPPING = {
+CKAN_FORMAT_TO_DATA_PACKAGE_FORMAT = {
+    'csv': 'csv',
+    'html': 'html',
+    'xls': 'xls',
+    'xml': 'xml',
+    'pdf': 'pdf',
+    'json': 'json',
+    'rdf': 'rdf',
+    'zip': 'zip',
+    'ods': 'ods',
+    'txt': 'txt',
+    'aspx': 'aspx',
+    'doc': 'doc',
+    'xsd': 'xsd',
+    'asp': 'asp',
+    'ppt': 'ppt',
+    'kml': 'kml',
+    'exe': 'exe',
+    'xlsx': 'xlsx',
     'application/pdf; charset=binary': 'pdf',
     'application/vnd.ms-excel; charset=binary': 'xls',
     'application/zip; charset=binary': 'zip',
@@ -41,11 +54,4 @@ def datapackage_format(resource_format):
 
     "Would be expected to be the the standard file extension for this type of resource"
     '''
-    # Most of the resource formats when lowercase are acceptable file extensions
-    if resource_format.lower() in ACCEPTABLE_EXTENSIONS:
-        return resource_format.lower()
-
-    # Others have the mimetype stored as the format so we map to the
-    # appropriate file extension
-    if MIME_TO_FORMAT_MAPPING.get(resource_format.lower()):
-        return MIME_TO_FORMAT_MAPPING.get(resource_format.lower())
+    return CKAN_FORMAT_TO_DATA_PACKAGE_FORMAT.get(resource_format.lower())
