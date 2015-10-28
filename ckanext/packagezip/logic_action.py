@@ -2,7 +2,7 @@ import ckan.plugins as p
 import ckan.logic as logic
 from ckanext.archiver.model import Archival
 from ckan.logic.auth import get_package_object
-from ckanext.packagezip.util import FilenameDeduplicator
+from ckanext.packagezip.util import FilenameDeduplicator, datapackage_format
 from ckanext.packagezip.model import PackageZip
 
 LICENSE_LOOKUP = {
@@ -51,9 +51,15 @@ def datapackage_show(context, data_dict):
                 filename = res['id']
             cache_filepath = ''
         filename = fd.deduplicate(filename)
-        datapackage['resources'].append({'url': res['url'],
-                                         'path': u'data/{0}'.format(filename),
-                                         'cache_filepath': cache_filepath,
-                                         'description': res['description']})
+        resource_json = {'url': res['url'],
+                         'path': u'data/{0}'.format(filename),
+                         'cache_filepath': cache_filepath,
+                         'description': res['description']}
+
+        format = datapackage_format(res['format'])
+        if format:
+            resource_json['format'] = format
+
+        datapackage['resources'].append(resource_json)
 
     return datapackage

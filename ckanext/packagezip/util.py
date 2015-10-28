@@ -21,3 +21,37 @@ class FilenameDeduplicator(object):
 
         self.seen.append(filename)
         return filename
+
+CKAN_FORMAT_TO_DATA_PACKAGE_FORMAT = {
+    'csv': 'csv',
+    'html': 'html',
+    'xls': 'xls',
+    'xml': 'xml',
+    'pdf': 'pdf',
+    'json': 'json',
+    'rdf': 'rdf',
+    'zip': 'zip',
+    'ods': 'ods',
+    'txt': 'txt',
+    'aspx': 'aspx',
+    'doc': 'doc',
+    'xsd': 'xsd',
+    'asp': 'asp',
+    'ppt': 'ppt',
+    'kml': 'kml',
+    'exe': 'exe',
+    'xlsx': 'xlsx',
+    'application/pdf; charset=binary': 'pdf',
+    'application/vnd.ms-excel; charset=binary': 'xls',
+    'application/zip; charset=binary': 'zip',
+    'txt/plain': 'txt',
+}
+
+def datapackage_format(resource_format):
+    '''
+    Convert from the format stored in resource.format into the format required by
+    the datapackage spec:
+
+    "Would be expected to be the the standard file extension for this type of resource"
+    '''
+    return CKAN_FORMAT_TO_DATA_PACKAGE_FORMAT.get(resource_format.lower())
