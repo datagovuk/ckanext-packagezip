@@ -32,8 +32,8 @@
         <p id="description">{{datapackage.description}}</p>
         {% endif %}
 
-        <table class="table">
-          <tr id="license"><td>License</td><td>{{datapackage.license}}</td></tr>
+        <table class="table"  cellspacing="0">
+          <tr id="license"><td>License</td><td style='text-align: right;'>{{datapackage.license or "Not specified"}}</td></tr>
         </table>
 
         <h2>Resources</h2>
@@ -47,7 +47,12 @@
       {% else %}
         <li>
           <span class="missing">{{resource.description}}</span>
-          - (<a href="{{resource.url}}" class="source">source</a>)
+          - (<a href="{{resource.url}}" class="source">source</a>)<br/>
+          {% if resource.has_data %} This resource is missing from the data.gov.uk archive.
+          {% if resource.reason %}During archiving this resource failed because: {{ resource.reason }}{% endif %}
+          {% else %}Resource is not included in the zip because the detected format '{{ resource.detected_format }}'
+          suggests it is not data
+          {% endif %}
         </li>
       {% endif %}
     {% endfor %}

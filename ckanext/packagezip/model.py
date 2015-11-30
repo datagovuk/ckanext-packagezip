@@ -20,7 +20,7 @@ metadata = MetaData()
 
 class PackageZip(Base):
     """
-    Details of the zip of cached resources in a package. 
+    Details of the zip of cached resources in a package.
     """
     __tablename__ = 'package_zip'
 
@@ -30,9 +30,11 @@ class PackageZip(Base):
     # Details of last successful zip
     filepath = Column(types.UnicodeText)
     size = Column(types.BigInteger, default=0)
+    has_data = Column(types.Boolean, default=True)
 
     created = Column(types.DateTime, default=datetime.now)
     updated = Column(types.DateTime, default=datetime.now, onupdate=datetime.now)
+
 
     def __repr__(self):
         return '<PackageZip {0}>'.format(self.filepath)
@@ -48,11 +50,12 @@ class PackageZip(Base):
             return None
 
     @classmethod
-    def create(cls, package_id, filepath, size):
+    def create(cls, package_id, filepath, size, has_data=True):
         pz = cls()
         pz.package_id = package_id
         pz.filepath = filepath
         pz.size = size
+        pz.has_data = has_data
 
         model.Session.add(pz)
         model.Session.commit()

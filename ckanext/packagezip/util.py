@@ -55,3 +55,20 @@ def datapackage_format(resource_format):
     "Would be expected to be the the standard file extension for this type of resource"
     '''
     return CKAN_FORMAT_TO_DATA_PACKAGE_FORMAT.get(resource_format.lower())
+
+def resource_has_data(resource):
+    '''
+    Checks the format, according to QA to ensure it is not in our list of
+    formats that do not have data ("HTML", "API", "SPARQL", "WMS", "WFS",
+    "API").  If it hasn't been through QA, fallback to the resource.
+
+    Returns a boolean denoting whether it is not one of the formats we
+    consider data-less, and the actual format as recorded by QA.
+    '''
+    from ckanext.qa.model import QA
+    format = resource['format']
+    qa = QA.get_for_resource(resource['id'])
+    if qa:
+        format = qa.format.upper() if qa.format else ''
+    return format.upper() not in \
+        ["HTML", "API", "SPARQL", "WMS", "WFS", "API"], format.upper()
