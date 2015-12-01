@@ -2,7 +2,9 @@ import ckan.plugins as p
 import ckan.logic as logic
 from ckanext.archiver.model import Archival
 from ckan.logic.auth import get_package_object
-from ckanext.packagezip.util import FilenameDeduplicator, datapackage_format
+from ckanext.packagezip.util import (FilenameDeduplicator,
+                                     datapackage_format,
+                                     resource_has_data,)
 from ckanext.packagezip.model import PackageZip
 
 LICENSE_LOOKUP = {
@@ -42,19 +44,30 @@ def datapackage_show(context, data_dict):
     for res in pkg['resources']:
         archival = Archival.get_for_resource(res['id'])
         if archival and archival.cache_filepath:
+            # We have archived it, and we have a path.
             _, resource_id, filename = archival.cache_filepath.rsplit('/', 2)
             cache_filepath = archival.cache_filepath
         else:
+            # Try and work out the filename from the URL.
             try:
                 _, filename = res['url'].rsplit('/', 1)
             except ValueError:
                 filename = res['id']
             cache_filepath = ''
+
+
         filename = fd.deduplicate(filename)
         resource_json = {'url': res['url'],
                          'path': u'data/{0}'.format(filename),
                          'cache_filepath': cache_filepath,
                          'description': res['description']}
+        resource_json['has_data'], resource_json['detected_format'] = \
+            resource_has_data(res)
+
+        # If we have archived the data, but the link was broken
+        # then record the reason.
+        if archival and archival.is_broken:
+            resource_json['reason'] = archival.reason
 
         format = datapackage_format(res['format'])
         if format:

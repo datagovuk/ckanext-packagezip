@@ -1,6 +1,5 @@
 import ckan.plugins as p
 from ckanext.archiver.interfaces import IPipe
-from ckan.lib.celery_app import celery
 from pylons import config
 
 import os
@@ -16,6 +15,7 @@ class PackageZipPlugin(p.SingletonPlugin):
     p.implements(p.ITemplateHelpers, inherit=True)
 
     def receive_data(self, operation, queue, **params):
+        from ckan.lib.celery_app import celery
         if operation == 'package-archived':
             package_id = params.get('package_id')
 

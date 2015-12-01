@@ -61,12 +61,16 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
                       e)
             raise
 
+        any_have_data = False
         for res in datapackage['resources']:
-           if res['cache_filepath'] and os.path.exists(res['cache_filepath']):
-               zipf.write(res['cache_filepath'], res['path'])
-               res['included_in_zip'] = True
-           else:
-               res['included_in_zip'] = False
+            if res['has_data']:
+                any_have_data = True
+
+            if res['cache_filepath'] and os.path.exists(res['cache_filepath']):
+                zipf.write(res['cache_filepath'], res['path'])
+                res['included_in_zip'] = True
+            else:
+                res['included_in_zip'] = False
 
         env = Environment(loader=PackageLoader('ckanext.packagezip', 'templates'))
         env.filters['datetimeformat'] = datetimeformat
@@ -75,6 +79,17 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
         zipf.writestr('index.html',
                       template.render(datapackage=datapackage,
                                       date=datetime.datetime.now()).encode('utf8'))
+
+        # Strip out unnecessary data from datapackage
+        for res in datapackage['resources']:
+            del res['has_data']
+            if 'cache_filepath' in res:
+                del res['cache_filepath']
+            if 'reason' in res:
+                del res['reason']
+            if 'detected_format' in res:
+                del res['detected_format']
+
         zipf.writestr('datapackage.json', json.dumps(datapackage, indent=4))
 
     statinfo = os.stat(filepath)
@@ -82,10 +97,14 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
 
     package_zip = PackageZip.get_for_package(package_id)
     if not package_zip:
-        PackageZip.create(package_id, filepath, filesize)
+        PackageZip.create(package_id, filepath, filesize, has_data=any_have_data)
         log.info('Package zip created: %s', filepath)
     else:
         package_zip.filepath = filepath
         package_zip.updated = datetime.datetime.now()
         package_zip.size = filesize
+        package_zip.has_data = any_have_data
         log.info('Package zip updated: %s', filepath)
+
+        model.Session.add(package_zip)
+        model.Session.commit()

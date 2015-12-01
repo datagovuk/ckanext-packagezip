@@ -70,9 +70,7 @@ class PackageZip(CkanCommand):
             queue = 'priority'
 
             for dataset in datasets:
-                celery.send_task('packagezip.create_zip',
-                                args=[ckan_ini_filepath, dataset.id, queue],
-                                task_id=task_id, queue=queue)
-                print 'Queued %s' % dataset.name
+                from ckanext.packagezip.tasks import create_zip
+                create_zip(ckan_ini_filepath, dataset.id)
         else:
             self.log.error('Command %s not recognized' % (cmd,))
