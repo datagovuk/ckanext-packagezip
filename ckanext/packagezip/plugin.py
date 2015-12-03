@@ -52,6 +52,7 @@ class PackageZipPlugin(p.SingletonPlugin):
         import ckanext.packagezip.helpers as helpers
         helper_dict = {
             'has_packagezip': helpers.has_packagezip,
+            'packagezip_has_data': helpers.packagezip_has_data,
             'packagezip_url': helpers.packagezip_url,
             'packagezip_size': helpers.packagezip_size,
             'datapackage_url': helpers.datapackage_url,
