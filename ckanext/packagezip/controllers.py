@@ -15,6 +15,16 @@ class PackageZipController(t.BaseController):
         except t.NotAuthorized:
             t.abort(401)
 
+        # Strip fields that we don't want in the results
+        for r in datapackage.get('resources', []):
+            if 'has_data' in r:
+                del r['has_data']
+            if 'cache_filepath' in r:
+                del r['cache_filepath']
+            if 'detected_format' in r:
+                r['format'] = r['detected_format']
+                del r['detected_format']
+
         response.headers['Content-type'] = 'application/json'
         return json.dumps(datapackage, sort_keys=True, indent=4)
 
