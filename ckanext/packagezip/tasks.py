@@ -3,6 +3,7 @@ from ckan import model
 from ckan.logic import get_action
 from ckanext.archiver.model import Archival
 from ckanext.packagezip.model import PackageZip
+import ckan.plugins.toolkit as t
 from pylons import config
 
 import os
@@ -45,6 +46,12 @@ def create_zip(ckan_ini_filepath, package_id, queue='bulk'):
 
     context = {'model': model, 'ignore_auth': True, 'session': model.Session}
     pkg = get_action('package_show')(context, {'id': package_id})
+
+    extras = dict([(d['key'], d['value'],) for d in pkg['extras']])
+    unpublished = t.asbool(extras.get('unpublished', False))
+    if unpublished:
+        log.info("Skipping unpublished dataset: %s", pkg['name'])
+        return
 
     directory = config.get('ckanext.packagezip.destination_dir')
     if not os.path.exists(directory):
