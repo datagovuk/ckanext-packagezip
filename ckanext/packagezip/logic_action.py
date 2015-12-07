@@ -14,6 +14,7 @@ LICENSE_LOOKUP = {
 @p.toolkit.side_effect_free
 def datapackage_show(context, data_dict):
     """
+    Generate the data required for a datapackage for the specified package.
     """
     model = context['model']
 
@@ -54,7 +55,6 @@ def datapackage_show(context, data_dict):
             except ValueError:
                 filename = res['id']
             cache_filepath = ''
-
 
         filename = fd.deduplicate(filename)
         resource_json = {'url': res['url'],
