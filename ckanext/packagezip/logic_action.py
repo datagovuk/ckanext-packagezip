@@ -9,7 +9,11 @@ from ckanext.packagezip.model import PackageZip
 
 LICENSE_LOOKUP = {
     'uk-ogl': 'OGL-UK-3.0',
+    'odc-odbl': 'ODbL-1.0',
+    'odc-by': 'ODC-BY-1.0',
     'cc-zero': 'CC0-1.0',
+    'cc-by': 'CC-BY-4.0',
+    'cc-by-sa': 'CC-BY-SA-4.0',
 }
 
 @p.toolkit.side_effect_free
