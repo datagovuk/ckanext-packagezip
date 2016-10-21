@@ -29,6 +29,7 @@ class PackageZipController(t.BaseController):
         return json.dumps(datapackage, sort_keys=True, indent=4)
 
     def zipfile(self, name):
+        t.abort(403, 'Feature temporarily disabled')
         context = {'model': model, 'session': model.Session}
         try:
             datapackage = t.get_action('datapackage_show')(context, {'id': name})
